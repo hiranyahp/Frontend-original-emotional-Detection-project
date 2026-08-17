@@ -16,6 +16,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Vercel + Local Backend
+
+The deployed frontend should call the FastAPI backend through the local proxy route:
+
+```text
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_URL=https://hiranya.tailce2c1c.ts.net
+NEXT_PUBLIC_APP_URL=https://your-vercel-app.vercel.app
+```
+
+`BACKEND_URL` must be a public HTTPS URL for the local FastAPI backend, currently exposed through Tailscale Funnel. Do not use Cloudflare quick tunnel URLs here.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

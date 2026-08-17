@@ -16,21 +16,33 @@ async function proxyRequest(request: Request, context: RouteContext) {
       ? undefined
       : await request.arrayBuffer();
 
-  const response = await fetch(targetUrl, {
-    method: request.method,
-    headers: {
-      "Content-Type": request.headers.get("Content-Type") || "application/json",
-    },
-    body,
-  });
+  try {
+    const response = await fetch(targetUrl, {
+      method: request.method,
+      headers: {
+        "Content-Type": request.headers.get("Content-Type") || "application/json",
+      },
+      body,
+    });
 
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: {
-      "Content-Type": response.headers.get("Content-Type") || "application/json",
-    },
-  });
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: {
+        "Content-Type": response.headers.get("Content-Type") || "application/json",
+      },
+    });
+  } catch (error) {
+    console.error("Backend proxy request failed:", error);
+
+    return Response.json(
+      {
+        detail:
+          "Could not reach the project backend. Check BACKEND_URL, Tailscale Funnel, and the local FastAPI server.",
+      },
+      { status: 502 }
+    );
+  }
 }
 
 export const GET = proxyRequest;
