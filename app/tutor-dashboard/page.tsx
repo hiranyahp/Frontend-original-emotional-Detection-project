@@ -21,6 +21,7 @@ export default function TutorDashboardPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [backendError, setBackendError] = useState("");
   const [copiedMeetingId, setCopiedMeetingId] = useState<number | null>(null);
+  const [deletingMeetingId, setDeletingMeetingId] = useState<number | null>(null);
 
   const loadMeetings = async () => {
     setMeetings(await api.listMeetings());
@@ -101,12 +102,23 @@ export default function TutorDashboardPage() {
     const confirmed = window.confirm("Are you sure you want to delete this meeting?");
     if (!confirmed) return;
 
+    setDeletingMeetingId(id);
+    setBackendError("");
+
     try {
       await api.deleteMeeting(id);
-      await loadMeetings();
+      setMeetings((currentMeetings) =>
+        currentMeetings.filter((meeting) => meeting.id !== id)
+      );
       if (editingId === id) resetForm();
-    } catch {
-      setBackendError("Could not delete meeting. Check project backend.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not delete meeting. Check project backend.";
+      setBackendError(message);
+    } finally {
+      setDeletingMeetingId(null);
     }
   };
 
@@ -401,10 +413,12 @@ export default function TutorDashboardPage() {
                             </button>
 
                             <button
+                              type="button"
                               onClick={() => handleDelete(meeting.id)}
-                              className="px-4 py-2 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition"
+                              disabled={deletingMeetingId === meeting.id}
+                              className="px-4 py-2 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:cursor-not-allowed disabled:bg-slate-300"
                             >
-                              Delete
+                              {deletingMeetingId === meeting.id ? "Deleting..." : "Delete"}
                             </button>
 
                             <button
